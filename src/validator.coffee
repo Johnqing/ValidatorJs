@@ -1,12 +1,16 @@
 $ = jQuery
 
+#默认配置项
 defaultConfig = 
 
 	# 需要选中的元素
-	target: '[require]'
+	ident: '[require]'
 
 	# 错误提示
 	errorClass: 'error'
+
+	# 是否把错误class写到父级元素上 
+	isParent: false
 
 	# 执行事件
 	event: 'blur'
@@ -24,6 +28,12 @@ defaultConfig =
 	# 后回调
 	afterCallback: ->
 
+
+# 方法集合
+rules = 
+	email: 
+
+# 点击按钮时的设置和验证
 validateSubmit = (opts) ->
 	self = @
 
@@ -39,17 +49,33 @@ validateSubmit = (opts) ->
 				evt.preventDefault()
 				return false;
 
-			
-			
-		)	
+			if !checkForm.call(self, opts)
+				return false
+						
+		)
+		return	
 
-	
+
+# 检查当前拥有的表单项
+checkForm = (opts) ->
+	items = @find opts.ident
+	field = []
+	items.each( ->
+		(field = validate.call(@, opts.errorClass, opts.isParent)) && field.push(@)
+		return
+	)
+	return !field.length
+
+# 验证公共函数
+validate = (errCls, isParent) ->
+
+
 
 $.fn.validate = (opts) ->
 	opts = $.extend {}, defaultConfig, opts
 	return @each( ->
 		self = $(@)
-		ident = opts.target
+		ident = opts.ident
 
 		# add novalidate
 		# 去除默认样式
