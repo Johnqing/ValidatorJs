@@ -46,10 +46,11 @@ check = (elem, valid, opts) ->
 		if method
 			res = method(elem.value, elem, v)
 			if not res
-				showError(elem.name, k, opts)
+				showError elem.name, k, opts
+				return res
 			else
 				removeError elem.name, k, opts
-			return res
+	return res
 		
 # 显示错误信息	
 showError = (name, k, opts) ->
@@ -71,6 +72,7 @@ removeError = (name, k, opts) ->
 	if not errWrap.length
 		return
 	errWrap.text('').removeClass opts.klass
+	return
 	
 
 
@@ -78,12 +80,25 @@ removeError = (name, k, opts) ->
 $.validateRules = 
 	required: (value, elem, param) ->
 		if elem.nodeName.toLowerCase() is 'select'
-			val = $(elem).val()
-			return val and val.length > 0
+			return elem.selectedIndex != 0;
 
 		if checkable(elem)
 			return getLength(value, element) > 0
 		return $.trim(value).length > 0
+	equalTo: (value, elem, param) ->
+		param = param.replace '#',''
+		pv = $(`'[name='+param+']'`).val()
+		return $.trim(pv) is $.trim(value)
+	setPwd: (value, elem, param) ->
+		reg = /^[x00-x7f]+$/
+
+		if not reg.test value
+			return false
+		if value.length < 6 or value.length > 18
+			return false
+
+		return true
+
 # 默认参数
 defalutConfig = 
 	identifie: '[required]'
@@ -92,10 +107,11 @@ defalutConfig =
 	isErrorOnParent: false
 	event: 'blur'
 	submit: true
+	isAjaxSubmit: false
 	errElem: 'cite'
 
 
-$.fn.simpleValidate = (opts) ->
+$.fn.simpleValidate = (opts, callback) ->
 	opts = $.extend {}, defalutConfig, opts
 
 	form = opts.form
@@ -108,7 +124,7 @@ $.fn.simpleValidate = (opts) ->
 		if checkable(item) || item[0].nodeName.toLowerCase() is 'select'
 			opts.event = 'change blur'
 		item.on(opts.event, ->
-			check $(@).attr('name'), v, opts
+			check $(@), v, opts
 			return
 		)
 		return
@@ -131,38 +147,11 @@ $.fn.simpleValidate = (opts) ->
 			if opts.debug
 				event.preventDefault()
 				return false
-			checkAll.call(this, opts)			
+			checkStata = checkAll.call(this, opts)
+			if  checkStata and opts.isAjaxSubmit
+				callback and callback()
+				
+				return checkStata
+			return	
 		)
 	return
-
-
-# 提交验证
-$('.btn_recharge').simpleValidate(
-	identifie: 
-		login_passwd:
-			required: true
-		pay_passwd: 
-			required: true
-		re_pay_passwd: 
-			required: true
-			equalTo: '#pay_passwd'
-		question:
-			required: true
-		answer:
-			required: true
-	message: 
-		login_passwd:
-			required: '登陆密码不能为空'
-		pay_passwd: 
-			required: '支付密码不能为空'
-		re_pay_passwd: 
-			required: '支付密码不能为空'
-			equalTo: '2次输入的密码不一致'
-		answer:
-			required: '答案不能为空'
-
-	klass: 'inp_error'
-	form: '.form_mc'
-	submit: false
-)
-	
