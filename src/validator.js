@@ -55,16 +55,15 @@
                 errWrap = node.find('[data-errwrap=' + name + ']')
 
             if (item.not(':checkbox').not('radio').length) {
-                item.removeClass(config.klass).removeClass(config.fKlass).addClass(cls);
+                item.removeClass(config.klass  +' '+ config.fKlass).addClass(cls);
             }
 
             if(!msg) return;
 
             if(errWrap.length){
-                errWrap.removeClass(config.klass).removeClass(config.fKlass).removeClass(config.success).addClass(cls).html(msg);
+                errWrap.removeClass(config.klass +' '+ config.fKlass  +' '+ config.success).addClass(cls).html(msg);
                 return;
             }
-
             errWrap = $('<'+ config.errElem +' data-errwrap='+name+' class="'+cls+'">'+ msg +'</'+ config.errElem +'>');
             item.parent().append(errWrap);
         },
@@ -75,11 +74,11 @@
                 node = config.form
 
             var errWrap = node.find('[data-errwrap=' + name + ']');
-            item.removeClass(config.klass).removeClass(config.fKlass);
+            item.removeClass(config.klass +' '+ config.fKlass);
             if (!errWrap.length) {
                 return;
             }
-            errWrap.text('').removeClass(config.klass).removeClass(config.fKlass).addClass(config.success);
+            errWrap.text('').removeClass(config.klass +' '+ config.fKlass).addClass(config.success);
         },
         check: function(item, rules){
             var that = this,
