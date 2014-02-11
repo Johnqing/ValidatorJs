@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>Validator | demo</title>
+</head>
+<body>
+
+<form action="/" data-type="form">
+    <input type="text" data-form="username"/> <br>
+    <select name="" data-form="num">
+        <option value="0">-请选择-</option>
+        <option value="1">color1</option>
+        <option value="2">color2</option>
+    </select>
+    <button data-type="submit">click</button>
+</form>
+
+
+<script type="text/javascript" src="http://s0.qhimg.com/lib/jquery/171.js"></script>
+<script type="text/javascript" src="src/validator.js"></script>
+
+<script type="text/javascript">
+    var rules = {
+        username: {
+            required: true
+        },
+        num: {
+            required: true
+        }
+    }
+
+    var messages = {
+        username: {
+            required: '必填项'
+        },
+        num: {
+            required: '请选择'
+        }
+    }
+    validator.init('[data-type="submit"]', {
+        rules: rules,
+        message: messages,
+        klass: 'error',
+        fKlass: 'remind'
+    });
+</script>
+</body>
+</html>
