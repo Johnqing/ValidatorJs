@@ -1,6 +1,5 @@
 (function(globle){
-    var document = globle.document;
-
+    globle.validator = globle.validator || {};
     // 验证相关
 
     var idCard15To18 = function(id) {
@@ -51,7 +50,7 @@
                 cls = t ? config.klass: config.fKlass
 
             var name = item.attr('data-form'),
-                msg = validator.message[name] || config.message[name][t ? arguments[1] : 'focus'],
+                msg = validator.Form.message[name] || config.message[name][t ? arguments[1] : 'focus'],
                 errWrap = node.find('[data-errwrap=' + name + ']')
 
             if (item.not(':checkbox').not('radio').length) {
@@ -61,7 +60,7 @@
             if(!msg) return;
 
             if(errWrap.length){
-                errWrap.removeClass(config.klass +' '+ config.fKlass  +' '+ config.success).addClass(cls).html(msg);
+                errWrap.removeClass(config.klass +' '+ config.fKlass  +' '+ config.sucKlass).addClass(cls).html(msg);
                 return;
             }
             errWrap = $('<'+ config.errElem +' data-errwrap='+name+' class="'+cls+'">'+ msg +'</'+ config.errElem +'>');
@@ -78,7 +77,7 @@
             if (!errWrap.length) {
                 return;
             }
-            errWrap.text('').removeClass(config.klass +' '+ config.fKlass).addClass(config.success);
+            errWrap.text('').removeClass(config.klass +' '+ config.fKlass).addClass(config.sucKlass);
         },
         check: function(item, rules){
             var that = this,
@@ -90,7 +89,7 @@
 
             for(var rl in rules){
                 var r = rules[rl],
-                    method = validator.rules[rl];
+                    method = validator.Form.rules[rl];
                 if(method){
                     result = method(value, el, r);
 
@@ -123,16 +122,17 @@
             return arr.length === 0
         },
         itemEvent: function(item, key, rules){
-            var that = this;
+            var that = this,
+                config = that.config;
             if(item[0].nodeName.toLowerCase() === 'select' || checkable(item[0])){
-                that.config.event = 'change blur';
+                config.event = 'change blur';
             }
 
-            item.on(that.config.event, function() {
+            item.on(config.event, function() {
                 that.check($(this), rules);
             });
 
-            if(that.config.fKlass){
+            if(config.fKlass){
                 item.on('focus', function(){
                     that.logs($(this));
                 });
@@ -140,10 +140,11 @@
         },
         submitEvt: function(){
             var that = this,
+                config = that.config,
                 field = that.field,
-                node = that.config.form;
+                node = config.form;
 
-            if(that.config.isSubmit){
+            if(!config.isAsync){
                 field.on('click', function(){
                     node.trigger('submit');
                     return false;
@@ -152,7 +153,7 @@
                 node.on('submit', function(evt){
                     var st = that.checkAll();
 
-                    if(that.config.debug && globle.console){
+                    if(config.debug && globle.console){
                         console.log(st);
                         evt.preventDefault();
                         return false;
@@ -162,7 +163,22 @@
                 });
                 return;
             }
-
+            // ajax提交
+            $.ajax({
+                url: node.attr("action") || "",
+                type: node.attr("method") || "get",
+                dataType: "json",
+                data: node.serialize(),
+                success: function(data){
+                    if(data['error']){
+                        return config.error(data);
+                    }
+                    config.success(data);
+                },
+                error: function(){
+                    config.error();
+                }
+            });
 
 
         },
@@ -185,14 +201,20 @@
         dataIg: 'data-ig',
         klass: 'error',
         fKlass: null,
-        success: 'success',
+        sucKlass: 'success',
         form: '[data-type="form"]',
         event: 'blur',
-        isSubmit: true,
+        isAsync: false,  //提交方式，默认同步提交，直接提交form，如果设为true，则异步提交
         errElem: 'cite',
-        debug: false
+        debug: false,
+        success:function(data){
+
+        },
+        error:function(){
+
+        }
     };
-    globle.validator = function(){
+    validator.Form = function(){
         return {
             init: function(els, config){
                 if(!els) return;
@@ -205,9 +227,9 @@
     }();
 
     // 错误信息
-    validator.message = validator.message || {};
+    validator.Form.message = validator.Form.message || {};
 
-    validator.rules = validator.rules || {
+    validator.Form.rules = validator.Form.rules || {
         required: function(value, elem){
             if (elem.nodeName.toLowerCase() === 'select') {
                 return ~~elem.value;
@@ -233,8 +255,8 @@
          * 身份证号验证
          */
         certificate: function(arrIdCard){
+            var a, check_number, number, sigma, w, ai, wi;
             arrIdCard = arrIdCard.replace(/\s/g, '');
-            var a, check_number, number, sigma, w;
             arrIdCard = arrIdCard.length === 15 ? idCard15To18(arrIdCard) : arrIdCard;
             sigma = 0;
             a = [7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2];

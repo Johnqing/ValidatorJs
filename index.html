@@ -38,11 +38,13 @@
             required: '请选择'
         }
     }
-    validator.init('[data-type="submit"]', {
+    validator.Form.init('[data-type="submit"]', {
         rules: rules,
         message: messages,
         klass: 'error',
-        fKlass: 'remind'
+        fKlass: 'remind',
+        // 是否ajax提交, fasle时为正常 form提交
+        isAsync: true
     });
 </script>
 </body>
