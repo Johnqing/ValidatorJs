@@ -164,22 +164,24 @@
                 return;
             }
             // ajax提交
-            $.ajax({
-                url: node.attr("action") || "",
-                type: node.attr("method") || "get",
-                dataType: "json",
-                data: node.serialize(),
-                success: function(data){
-                    if(data['error']){
-                        return config.error(data);
+            field.on('click', function(){
+                $.ajax({
+                    url: node.attr("action") || "",
+                    type: node.attr("method") || "get",
+                    dataType: "json",
+                    data: node.serialize(),
+                    success: function(data){
+                        if(data['error']){
+                            return config.error(data);
+                        }
+                        config.success(data);
+                    },
+                    error: function(){
+                        config.error();
                     }
-                    config.success(data);
-                },
-                error: function(){
-                    config.error();
-                }
+                });
+                return false;
             });
-
 
         },
         getValidItem: function(callback){
