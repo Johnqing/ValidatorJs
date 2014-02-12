@@ -246,14 +246,6 @@
             }
             return $.trim(value).length > 0;
         },
-        minLen: function(value, elem, param) {
-            return getByteLen(value) >= param;
-        },
-        equalTo: function(value, elem, param) {
-            param = param.replace('#', '');
-            var pv = $(elem).parents('[data-url]').find('[data-form=' + param + ']').val();
-            return $.trim(pv) === $.trim(value);
-        },
         // TODO: 根据运营商增加号段，手动维护
         isMobile: function(value){
             return /^(13|15|18|14)\d{9}$/.test(value)
