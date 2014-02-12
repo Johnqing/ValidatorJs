@@ -7,6 +7,12 @@
 
 ## 用法
 
+html中表单项添加如下：
+
+```
+<input type="text" data-form='username' />
+```
+
 ```
 // 第一个参数为提交按钮，如：'.submit' | '#submit' | '[data-type=submit]' 等
 // 第二个参数为配置项
@@ -17,9 +23,12 @@ validator.Form.init('', {});
 
 ```
 {
-    // 该项为规则项。对象中的key为规则名，value为返回值需要对比的内容
+    // 该项为规则项。对象中的key为data-form中指定的（可以存在不在的data-form），规则集合
     rules: {
-        required: true
+        username: {
+            // key为验证的规则项，value为返回值需要对比的内容
+            required: true
+        }
     },
     // 剔除一些不需要 验证的内容
     dataIg: 'data-ig',
@@ -50,7 +59,7 @@ validator.Form.init('', {});
 
 ```
 validator.Form.rules['规则名'] = function(value, elem, param){
-    //规则函数返回3个参数, value: 值，elem：当前元素，param：配置项中 rules对象中的 value
+    //规则函数返回3个参数, value: 值，elem：当前元素，param：配置项中，单条规则的value
     //规则内容
 }
 ```
